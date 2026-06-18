@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="Evertech.Overtime.API/Evertech.Overtime.API.csproj" />
+    <Project Path="Evertech.Overtime.Domain/Evertech.Overtime.Domain.csproj" />
+  </Folder>
+  <Folder Name="/test/" />
+</Solution>
