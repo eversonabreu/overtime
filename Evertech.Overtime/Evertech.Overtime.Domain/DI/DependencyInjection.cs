@@ -10,6 +10,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddDomain(this IServiceCollection services)
     {
+        services.AddSingleton<ICryptographyService, CryptographyService>();
         services.AddScoped<IHolidayService, HolidayService>();
         services.AddScoped<IJourneyDecomposerService, JourneyDecomposerService>();
         services.AddScoped<ICompensatoryBalanceService, CompensatoryBalanceService>();

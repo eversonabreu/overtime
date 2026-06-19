@@ -15,7 +15,7 @@ public sealed class Person : Entity
     public string Password { get; init; } = string.Empty;
 
     public bool IsActive { get; init; }
-    public int? ValidationCode { get; init; }
+    public bool IsPasswordPendingReset { get; init; }
     public decimal HourlyRate { get; init; }
     public bool CompensatoryTimeEnabled { get; init; }
     public Guid MunicipalityId { get; init; }
