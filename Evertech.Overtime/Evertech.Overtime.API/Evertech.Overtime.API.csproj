@@ -13,4 +13,9 @@
     <Folder Include="Endpoints\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Evertech.Overtime.Domain\Evertech.Overtime.Domain.csproj" />
+    <ProjectReference Include="..\Evertech.Overtime.Infrastructure\Evertech.Overtime.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>
