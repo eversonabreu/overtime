@@ -8,7 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace Evertech.Overtime.Infrastructure.Repositories;
 
 [ExcludeFromCodeCoverage]
-internal sealed class StateHolidayRepository(IUnitOfWork unitOfWork) : RepositoryBase<StateHoliday>(unitOfWork), IStateHolidayRepository
+internal sealed class StateHolidayRepository(IDbUnitOfWork unitOfWork) : RepositoryBase<StateHoliday>(unitOfWork), IStateHolidayRepository
 {
     protected override string TableName => "state_holiday";
 

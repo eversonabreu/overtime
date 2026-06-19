@@ -9,12 +9,12 @@ using System.Linq.Expressions;
 namespace Evertech.Overtime.Infrastructure.Repositories.Base;
 
 [ExcludeFromCodeCoverage]
-internal abstract class RepositoryBase<T>(IUnitOfWork unitOfWork) : IRepository<T>
+internal abstract class RepositoryBase<T>(IDbUnitOfWork unitOfWork) : IRepository<T>
     where T : Entity
 {
     protected abstract string TableName { get; }
 
-    protected IUnitOfWork UnitOfWork => unitOfWork;
+    protected IDbUnitOfWork UnitOfWork => unitOfWork;
 
     public async Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {

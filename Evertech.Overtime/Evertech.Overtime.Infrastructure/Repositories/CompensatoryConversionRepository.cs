@@ -8,7 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace Evertech.Overtime.Infrastructure.Repositories;
 
 [ExcludeFromCodeCoverage]
-internal sealed class CompensatoryConversionRepository(IUnitOfWork unitOfWork) : RepositoryBase<CompensatoryConversion>(unitOfWork), ICompensatoryConversionRepository
+internal sealed class CompensatoryConversionRepository(IDbUnitOfWork unitOfWork) : RepositoryBase<CompensatoryConversion>(unitOfWork), ICompensatoryConversionRepository
 {
     protected override string TableName => "compensatory_conversion";
 

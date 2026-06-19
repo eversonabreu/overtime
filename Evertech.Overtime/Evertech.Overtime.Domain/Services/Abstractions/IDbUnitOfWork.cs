@@ -2,7 +2,7 @@
 
 namespace Evertech.Overtime.Domain.Services.Abstractions;
 
-public interface IUnitOfWork : IAsyncDisposable
+public interface IDbUnitOfWork : IAsyncDisposable
 {
     IDbConnection Connection { get; }
     IDbTransaction? Transaction { get; }

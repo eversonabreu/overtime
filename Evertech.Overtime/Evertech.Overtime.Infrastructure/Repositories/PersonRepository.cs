@@ -8,7 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace Evertech.Overtime.Infrastructure.Repositories;
 
 [ExcludeFromCodeCoverage]
-internal sealed class PersonRepository(IUnitOfWork unitOfWork) : RepositoryBase<Person>(unitOfWork), IPersonRepository
+internal sealed class PersonRepository(IDbUnitOfWork unitOfWork) : RepositoryBase<Person>(unitOfWork), IPersonRepository
 {
     protected override string TableName => "person";
 

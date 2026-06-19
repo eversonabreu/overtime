@@ -5,12 +5,12 @@ using System.Data;
 
 namespace Evertech.Overtime.Infrastructure.UnitOfWork;
 
-internal sealed class UnitOfWork : IUnitOfWork
+internal sealed class DbUnitOfWork : IDbUnitOfWork
 {
     private readonly NpgsqlConnection _connection;
     private NpgsqlTransaction? _transaction;
 
-    public UnitOfWork(IDbConnectionFactory connectionFactory)
+    public DbUnitOfWork(IDbConnectionFactory connectionFactory)
     {
         _connection = (NpgsqlConnection)connectionFactory.CreateConnection();
         _connection.Open();

@@ -8,7 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace Evertech.Overtime.Infrastructure.Repositories;
 
 [ExcludeFromCodeCoverage]
-internal sealed class JourneyRepository(IUnitOfWork unitOfWork) : RepositoryBase<Journey>(unitOfWork), IJourneyRepository
+internal sealed class JourneyRepository(IDbUnitOfWork unitOfWork) : RepositoryBase<Journey>(unitOfWork), IJourneyRepository
 {
     protected override string TableName => "journey";
 
