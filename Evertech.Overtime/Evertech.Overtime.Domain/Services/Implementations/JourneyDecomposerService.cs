@@ -5,7 +5,7 @@ using Evertech.Overtime.Domain.Services.Abstractions;
 
 namespace Evertech.Overtime.Domain.Services.Implementations;
 
-internal sealed class JourneyDecomposerService(IHolidayCheckerService holidayCheckerService) : IJourneyDecomposerService
+internal sealed class JourneyDecomposerService(IHolidayService holidayService) : IJourneyDecomposerService
 {
     private const int MaxFirstTierMinutes = 120;
     private const int NightStartHour = 22;
@@ -108,7 +108,7 @@ internal sealed class JourneyDecomposerService(IHolidayCheckerService holidayChe
     {
         var date = DateOnly.FromDateTime(moment.DateTime);
 
-        var isHoliday = await holidayCheckerService.IsHolidayAsync(date, municipalityId, cancellationToken);
+        var isHoliday = await holidayService.IsHolidayAsync(date, municipalityId, cancellationToken);
         if (isHoliday)
             return DayType.Holiday;
 
