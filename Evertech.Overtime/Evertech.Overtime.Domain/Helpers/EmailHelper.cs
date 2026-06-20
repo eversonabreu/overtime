@@ -5,7 +5,7 @@ using System.Net.Mime;
 
 namespace Evertech.Overtime.Domain.Helpers;
 
-internal sealed class EmailHelper
+public sealed class EmailHelper
 {
     private string title;
     private List<string> recipients;

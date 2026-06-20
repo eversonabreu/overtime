@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="Evertech.Overtime.API/Evertech.Overtime.API.csproj" />
+    <Project Path="Evertech.Overtime.Application/Evertech.Overtime.Application.csproj" Id="4505cca9-f5b6-467f-b634-a20aa7bd7f0c" />
     <Project Path="Evertech.Overtime.Domain/Evertech.Overtime.Domain.csproj" />
     <Project Path="Evertech.Overtime.Infrastructure/Evertech.Overtime.Infrastructure.csproj" />
   </Folder>

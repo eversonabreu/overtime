@@ -14,8 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Evertech.Overtime.Domain\Evertech.Overtime.Domain.csproj" />
-    <ProjectReference Include="..\Evertech.Overtime.Infrastructure\Evertech.Overtime.Infrastructure.csproj" />
+    <ProjectReference Include="..\Evertech.Overtime.Application\Evertech.Overtime.Application.csproj" />
   </ItemGroup>
 
 </Project>

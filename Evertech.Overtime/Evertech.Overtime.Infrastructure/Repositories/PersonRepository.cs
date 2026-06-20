@@ -15,8 +15,8 @@ internal sealed class PersonRepository(IDbUnitOfWork unitOfWork) : RepositoryBas
     public override async Task<Guid> AddAsync(Person entity, CancellationToken cancellationToken = default)
     {
         const string sql = """
-            INSERT INTO person (id, name, registration, email, password, isActive, validationCode, hourlyRate, compensatoryTimeEnabled, municipalityId, createdAt, updatedAt)
-            VALUES (@Id, @Name, @Registration, @Email, @Password, @IsActive, @ValidationCode, @HourlyRate, @CompensatoryTimeEnabled, @MunicipalityId, @CreatedAt, @UpdatedAt)
+            INSERT INTO person (id, name, registration, email, password, isActive, isPasswordPendingReset, hourlyRate, compensatoryTimeEnabled, municipalityId, personManagerId, createdAt, updatedAt)
+            VALUES (@Id, @Name, @Registration, @Email, @Password, @IsActive, @IsPasswordPendingReset, @HourlyRate, @CompensatoryTimeEnabled, @MunicipalityId, @PersonManagerId, @CreatedAt, @UpdatedAt)
             """;
 
         var command = new CommandDefinition(sql, entity, UnitOfWork.Transaction, cancellationToken: cancellationToken);

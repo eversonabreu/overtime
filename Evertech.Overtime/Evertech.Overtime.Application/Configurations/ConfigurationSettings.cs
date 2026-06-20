@@ -1,10 +1,11 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using Microsoft.Extensions.Configuration;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
-namespace Evertech.Overtime.API;
+namespace Evertech.Overtime.Application.Configurations;
 
 [ExcludeFromCodeCoverage]
-internal static class ConfigurationSettings
+public static class ConfigurationSettings
 {
     public static void ResolveSecrets(IConfiguration configuration, string environmentName)
     {
@@ -104,7 +105,7 @@ internal static class ConfigurationSettings
         }
     }
 
-    public static void ResolveEnvironmentName(IWebHostEnvironment environment, string[] args)
+    public static string GetEnvironmentName(string[] args)
     {
         try
         {
@@ -123,22 +124,18 @@ internal static class ConfigurationSettings
                 else
                     environmentName = args[environmentArgument.index + 1];
 
-                environment.EnvironmentName = environmentName;
-                return;
+                return environmentName;
             }
 
             var isReleaseCommand = args.Any(x => x.Equals("-c", StringComparison.OrdinalIgnoreCase));
 
             if (isReleaseCommand)
-            {
-                environment.EnvironmentName = "Development";
-                return;
-            }
+               return "Development";
 
 #if DEBUG
-            environment.EnvironmentName = "Development";
+            return "Development";
 #else
-        environment.EnvironmentName = "Production";
+        return "Production";
 #endif
         }
         catch (Exception ex)
