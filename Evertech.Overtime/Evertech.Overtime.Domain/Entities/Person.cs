@@ -16,10 +16,13 @@ public sealed class Person : Entity
 
     public bool IsActive { get; init; }
     public bool IsPasswordPendingReset { get; init; }
+
+    [NotUpdatable]
+    public bool IsAdmin { get; init; }
+
     public decimal HourlyRate { get; init; }
     public bool CompensatoryTimeEnabled { get; init; }
     public Guid MunicipalityId { get; init; }
-    public Guid? PersonManagerId { get; init; }
 
     [NotUpdatable]
     public DateTimeOffset CreatedAt { get; init; }

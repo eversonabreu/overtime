@@ -23,6 +23,7 @@ public static class RegisterServices
     private static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
         services.AddScoped<IPersonService, PersonService>();
+        services.AddScoped<IGroupService, GroupService>();
 
         return services;
     }

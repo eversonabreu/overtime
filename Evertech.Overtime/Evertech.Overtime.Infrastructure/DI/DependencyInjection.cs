@@ -31,6 +31,8 @@ public static class DependencyInjection
         services.AddScoped<IStateHolidayRepository, StateHolidayRepository>();
         services.AddScoped<IMunicipalityHolidayRepository, MunicipalityHolidayRepository>();
         services.AddScoped<ICompensatoryConversionRepository, CompensatoryConversionRepository>();
+        services.AddScoped<IGroupRepository, GroupRepository>();
+        services.AddScoped<IGroupPersonRepository, GroupPersonRepository>();
 
         return services;
     }

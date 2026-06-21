@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Evertech.Overtime.Application.Models;
 
@@ -11,6 +11,7 @@ public sealed class PersonResponseModel
     public string Email { get; init; } = string.Empty;
     public bool IsActive { get; init; }
     public bool IsPasswordPendingReset { get; init; }
+    public bool IsAdmin { get; init; }
     public decimal HourlyRate { get; init; }
     public bool CompensatoryTimeEnabled { get; init; }
     public Guid MunicipalityId { get; init; }

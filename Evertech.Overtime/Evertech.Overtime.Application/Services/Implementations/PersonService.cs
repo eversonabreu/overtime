@@ -1,5 +1,6 @@
 ﻿using Evertech.Overtime.Application.Models;
 using Evertech.Overtime.Application.Services.Abstractions;
+using Evertech.Overtime.Domain.Exceptions;
 using Evertech.Overtime.Domain.Helpers;
 using Evertech.Overtime.Domain.Repositories;
 using Evertech.Overtime.Domain.Services.Abstractions;
@@ -10,6 +11,7 @@ namespace Evertech.Overtime.Application.Services.Implementations;
 
 internal sealed class PersonService(
     IPersonRepository personRepository,
+    IGroupPersonRepository groupPersonRepository,
     ICryptographyService cryptographyService,
     IDbUnitOfWork unitOfWork,
     IConfiguration configuration) : IPersonService
@@ -32,7 +34,7 @@ internal sealed class PersonService(
             Password = cryptographyService.Encrypt(plainPassword),
             IsActive = true,
             IsPasswordPendingReset = true,
-            PersonManagerId = null,
+            IsAdmin = true,
             CreatedAt = createdAt,
             UpdatedAt = createdAt
         };
@@ -54,10 +56,10 @@ internal sealed class PersonService(
             Password = cryptographyService.Encrypt(plainPassword),
             IsActive = true,
             IsPasswordPendingReset = true,
+            IsAdmin = model.IsAdmin,
             HourlyRate = model.HourlyRate,
             CompensatoryTimeEnabled = model.CompensatoryTimeEnabled,
             MunicipalityId = model.MunicipalityId,
-            PersonManagerId = model.PersonManagerId,
             CreatedAt = createdAt,
             UpdatedAt = createdAt
         };
@@ -72,11 +74,19 @@ internal sealed class PersonService(
         return person is null ? null : MapToResponse(person);
     }
 
-    public async Task UpdateAsync(UpdatePersonModel model, CancellationToken cancellationToken = default)
+    public async Task<OperationResult> UpdateAsync(UpdatePersonModel model, CancellationToken cancellationToken = default)
     {
         var current = await personRepository.GetByIdAsync(model.Id, cancellationToken);
         if (current is null)
-            return;
+            return OperationResult.Failure("A pessoa informada não foi encontrada.");
+
+        if (current.IsActive && !model.IsActive)
+        {
+            var isLeader = await groupPersonRepository.IsLeaderOfAnyGroupAsync(model.Id, cancellationToken);
+            if (isLeader)
+                return OperationResult.Failure(
+                    "Não é possível desativar esta pessoa pois ela é líder de pelo menos um grupo. Remova sua liderança de todos os grupos antes de desativá-la.");
+        }
 
         var person = new PersonEntity
         {
@@ -87,10 +97,10 @@ internal sealed class PersonService(
             Password = current.Password,
             IsActive = model.IsActive,
             IsPasswordPendingReset = current.IsPasswordPendingReset,
+            IsAdmin = current.IsAdmin,
             HourlyRate = model.HourlyRate,
             CompensatoryTimeEnabled = model.CompensatoryTimeEnabled,
             MunicipalityId = model.MunicipalityId,
-            PersonManagerId = current.PersonManagerId,
             CreatedAt = current.CreatedAt,
             UpdatedAt = DateTimeOffset.UtcNow
         };
@@ -100,6 +110,8 @@ internal sealed class PersonService(
         {
             await personRepository.UpdateAsync(person, cancellationToken);
             await unitOfWork.CommitAsync(cancellationToken);
+
+            return OperationResult.Success();
         }
         catch
         {
@@ -116,7 +128,7 @@ internal sealed class PersonService(
 
         var currentPlainPassword = cryptographyService.Decrypt(person.Password);
         if (currentPlainPassword != model.CurrentPassword)
-            throw new InvalidOperationException("A senha atual informada não confere.");
+            throw new BusinessException("A senha atual informada não confere.");
 
         await UpdatePasswordAsync(person, model.NewPassword, isPasswordPendingReset: false, sendEmail: false, cancellationToken);
     }
@@ -199,10 +211,10 @@ internal sealed class PersonService(
             Password = cryptographyService.Encrypt(newPlainPassword),
             IsActive = person.IsActive,
             IsPasswordPendingReset = isPasswordPendingReset,
+            IsAdmin = person.IsAdmin,
             HourlyRate = person.HourlyRate,
             CompensatoryTimeEnabled = person.CompensatoryTimeEnabled,
             MunicipalityId = person.MunicipalityId,
-            PersonManagerId = person.PersonManagerId,
             CreatedAt = person.CreatedAt,
             UpdatedAt = DateTimeOffset.UtcNow
         };
@@ -250,7 +262,7 @@ internal sealed class PersonService(
             <p>Sua nova senha provisória:</p>
             <p><strong>{plainPassword}</strong></p>
             <p>Por segurança, você precisará definir uma nova senha no seu próximo acesso.</p>
-            <p>Se você não solicitou esta redefinição, entre em contato com o seu gestor.</p>
+            <p>Se você não solicitou esta redefinição, entre em contato com o seu administrador ou líder de grupo.</p>
             """;
 
         return EmailHelper.Create(configuration)
@@ -267,6 +279,7 @@ internal sealed class PersonService(
         Email = person.Email,
         IsActive = person.IsActive,
         IsPasswordPendingReset = person.IsPasswordPendingReset,
+        IsAdmin = person.IsAdmin,
         HourlyRate = person.HourlyRate,
         CompensatoryTimeEnabled = person.CompensatoryTimeEnabled,
         MunicipalityId = person.MunicipalityId,
