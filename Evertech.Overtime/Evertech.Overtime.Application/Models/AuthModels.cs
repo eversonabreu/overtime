@@ -22,10 +22,17 @@ public sealed class RevokeTokenModel
 }
 
 [ExcludeFromCodeCoverage]
+public sealed class UpdateThemeModel
+{
+    public bool IsBlackTheme { get; init; }
+}
+
+[ExcludeFromCodeCoverage]
 public sealed class TokenResponseModel
 {
     public string AccessToken { get; init; } = string.Empty;
     public string RefreshToken { get; init; } = string.Empty;
     public DateTimeOffset AccessTokenExpiresAt { get; init; }
     public bool IsPasswordPendingReset { get; init; }
+    public bool IsBlackTheme { get; init; }
 }

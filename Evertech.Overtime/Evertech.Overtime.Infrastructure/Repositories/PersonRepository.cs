@@ -13,8 +13,8 @@ internal sealed class PersonRepository(IDbUnitOfWork unitOfWork) : RepositoryBas
     public override async Task<Guid> AddAsync(Person entity, CancellationToken cancellationToken = default)
     {
         const string sql = """
-            INSERT INTO person (id, name, registration, email, password, isActive, isPasswordPendingReset, isAdmin, hourlyRate, compensatoryTimeEnabled, municipalityId, createdAt, updatedAt)
-            VALUES (@Id, @Name, @Registration, @Email, @Password, @IsActive, @IsPasswordPendingReset, @IsAdmin, @HourlyRate, @CompensatoryTimeEnabled, @MunicipalityId, @CreatedAt, @UpdatedAt)
+            INSERT INTO person (id, name, registration, email, password, isActive, isPasswordPendingReset, isBlackTheme, isAdmin, hourlyRate, compensatoryTimeEnabled, municipalityId, createdAt, updatedAt)
+            VALUES (@Id, @Name, @Registration, @Email, @Password, @IsActive, @IsPasswordPendingReset, @IsBlackTheme, @IsAdmin, @HourlyRate, @CompensatoryTimeEnabled, @MunicipalityId, @CreatedAt, @UpdatedAt)
             """;
 
         var command = new CommandDefinition(sql, entity, UnitOfWork.Transaction, cancellationToken: cancellationToken);
@@ -67,6 +67,19 @@ internal sealed class PersonRepository(IDbUnitOfWork unitOfWork) : RepositoryBas
             """;
 
         var command = new CommandDefinition(sql, new { Id = id, Password = encryptedPassword, IsPasswordPendingReset = isPasswordPendingReset }, UnitOfWork.Transaction, cancellationToken: cancellationToken);
+        await UnitOfWork.Connection.ExecuteAsync(command);
+    }
+
+    public async Task UpdateThemeAsync(Guid id, bool isBlackTheme, CancellationToken cancellationToken = default)
+    {
+        const string sql = """
+            UPDATE person
+            SET isBlackTheme = @IsBlackTheme,
+                updatedAt = NOW()
+            WHERE id = @Id
+            """;
+
+        var command = new CommandDefinition(sql, new { Id = id, IsBlackTheme = isBlackTheme }, UnitOfWork.Transaction, cancellationToken: cancellationToken);
         await UnitOfWork.Connection.ExecuteAsync(command);
     }
 }

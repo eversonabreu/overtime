@@ -223,6 +223,21 @@ internal sealed class PersonService(
         }
     }
 
+    public async Task UpdateThemeAsync(Guid personId, bool isBlackTheme, CancellationToken cancellationToken = default)
+    {
+        await unitOfWork.BeginTransactionAsync(cancellationToken);
+        try
+        {
+            await personRepository.UpdateThemeAsync(personId, isBlackTheme, cancellationToken);
+            await unitOfWork.CommitAsync(cancellationToken);
+        }
+        catch
+        {
+            await unitOfWork.RollbackAsync(cancellationToken);
+            throw;
+        }
+    }
+
     private EmailHelper BuildWelcomeEmail(PersonEntity person, string plainPassword)
     {
         var body = $"""
@@ -267,6 +282,7 @@ internal sealed class PersonService(
         Email = person.Email,
         IsActive = person.IsActive,
         IsPasswordPendingReset = person.IsPasswordPendingReset,
+        IsBlackTheme = person.IsBlackTheme,
         IsAdmin = person.IsAdmin,
         HourlyRate = person.HourlyRate,
         CompensatoryTimeEnabled = person.CompensatoryTimeEnabled,

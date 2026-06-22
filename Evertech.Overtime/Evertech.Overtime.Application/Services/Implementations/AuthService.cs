@@ -153,7 +153,8 @@ internal sealed class AuthService(
             AccessToken = accessToken,
             RefreshToken = refreshToken,
             AccessTokenExpiresAt = accessTokenExpiration,
-            IsPasswordPendingReset = person.IsPasswordPendingReset
+            IsPasswordPendingReset = person.IsPasswordPendingReset,
+            IsBlackTheme = person.IsBlackTheme
         };
     }
 

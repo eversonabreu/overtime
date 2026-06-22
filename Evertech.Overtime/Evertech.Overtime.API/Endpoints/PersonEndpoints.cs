@@ -11,7 +11,7 @@ public static class PersonEndpoints
 {
     public static IEndpointRouteBuilder AddPersonEndpoints(this IEndpointRouteBuilder builder)
     {
-        var group = builder.MapGroup("/persons").WithTags("Persons").RequireAuthorization();
+        var group = builder.MapGroup("/persons").WithTags("Persons");
 
         group.MapPost("/bootstrap", async (
             CreateFirstPersonModel model,
@@ -45,7 +45,7 @@ public static class PersonEndpoints
 
             var id = await personService.CreateAsync(model, cancellationToken);
             return Results.Ok(new { data = new { id } });
-        });
+        }).RequireAuthorization();
 
         group.MapGet("/{id:guid}", async (
             Guid id,
@@ -64,7 +64,7 @@ public static class PersonEndpoints
         {
             var persons = await personService.GetActiveAsync(cancellationToken);
             return Results.Ok(new { data = persons });
-        });
+        }).RequireAuthorization();
 
         group.MapPut("/", async (
             UpdatePersonModel model,
@@ -89,7 +89,7 @@ public static class PersonEndpoints
             return result.IsSuccess
                 ? Results.NoContent()
                 : Results.UnprocessableEntity(new { message = result.Reason });
-        });
+        }).RequireAuthorization();
 
         group.MapPatch("/change-password", async (
             ChangePasswordModel model,
@@ -109,7 +109,7 @@ public static class PersonEndpoints
 
             await personService.ChangePasswordAsync(model, cancellationToken);
             return Results.NoContent();
-        });
+        }).RequireAuthorization();
 
         group.MapPatch("/request-password-reset", async (
             RequestPasswordResetModel model,
@@ -143,7 +143,18 @@ public static class PersonEndpoints
 
             await personService.ResetPasswordAsync(model, cancellationToken);
             return Results.NoContent();
-        });
+        }).RequireAuthorization();
+
+        group.MapPatch("/theme", async (
+            UpdateThemeModel model,
+            ClaimsPrincipal user,
+            IPersonService personService,
+            CancellationToken cancellationToken) =>
+        {
+            var personId = user.GetPersonId();
+            await personService.UpdateThemeAsync(personId, model.IsBlackTheme, cancellationToken);
+            return Results.NoContent();
+        }).RequireAuthorization();
 
         return builder;
     }

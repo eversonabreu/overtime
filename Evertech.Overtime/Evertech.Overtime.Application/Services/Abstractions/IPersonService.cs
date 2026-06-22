@@ -12,4 +12,5 @@ public interface IPersonService
     Task ChangePasswordAsync(ChangePasswordModel model, CancellationToken cancellationToken = default);
     Task RequestPasswordResetAsync(RequestPasswordResetModel model, CancellationToken cancellationToken = default);
     Task ResetPasswordAsync(ResetPasswordModel model, CancellationToken cancellationToken = default);
+    Task UpdateThemeAsync(Guid personId, bool isBlackTheme, CancellationToken cancellationToken = default);
 }

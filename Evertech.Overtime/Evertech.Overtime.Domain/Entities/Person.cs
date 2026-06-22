@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using Evertech.Overtime.Domain.Attributes;
 using Evertech.Overtime.Domain.Entities.Base;
 
@@ -16,6 +16,7 @@ public sealed class Person : Entity
 
     public bool IsActive { get; init; }
     public bool IsPasswordPendingReset { get; init; }
+    public bool IsBlackTheme { get; init; }
 
     [NotUpdatable]
     public bool IsAdmin { get; init; }
