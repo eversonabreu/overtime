@@ -1,3 +1,4 @@
+using Evertech.Overtime.API.Middlewares;
 using Evertech.Overtime.Application.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +11,8 @@ ConfigurationSettings.ResolveSecrets(builder.Configuration, builder.Environment.
 builder.Services.AddServices(builder.Configuration);
 
 var app = builder.Build();
+
+app.UseExceptionMiddleware();
 
 if (app.Environment.IsDevelopment())
 {
