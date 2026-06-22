@@ -33,6 +33,7 @@ public static class DependencyInjection
         services.AddScoped<ICompensatoryConversionRepository, CompensatoryConversionRepository>();
         services.AddScoped<IGroupRepository, GroupRepository>();
         services.AddScoped<IGroupPersonRepository, GroupPersonRepository>();
+        services.AddScoped<IPersonTokenRepository, PersonTokenRepository>();
 
         return services;
     }

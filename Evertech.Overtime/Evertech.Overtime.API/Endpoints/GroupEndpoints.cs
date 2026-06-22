@@ -4,9 +4,11 @@ using Evertech.Overtime.Application.Services.Abstractions;
 using Evertech.Overtime.Application.Validators;
 using Evertech.Overtime.API.Extensions;
 using FluentValidation;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Evertech.Overtime.API.Endpoints;
 
+[ExcludeFromCodeCoverage]
 public static class GroupEndpoints
 {
     public static IEndpointRouteBuilder AddGroupEndpoints(this IEndpointRouteBuilder builder)
@@ -88,19 +90,17 @@ public static class GroupEndpoints
                 : Results.UnprocessableEntity(new { message = result.Reason });
         });
 
-        group.MapDelete("/members", async (
-            RemoveGroupMemberModel model,
+        group.MapDelete("/members/{groupId:guid}/{personId:guid}", async (
+            Guid groupId,
+            Guid personId,
             ClaimsPrincipal user,
             IGroupService groupService,
-            IValidator<RemoveGroupMemberModel> validator,
             CancellationToken cancellationToken) =>
         {
-            if (!user.GetIsAdmin() && !user.IsLeaderOfGroup(model.GroupId))
+            if (!user.GetIsAdmin() && !user.IsLeaderOfGroup(groupId))
                 return Results.Forbid();
 
-            var errors = await ValidationHelper.ValidateAsync(validator, model, cancellationToken);
-            if (errors is not null)
-                return Results.BadRequest(new { errors });
+            var model = new RemoveGroupMemberModel { GroupId = groupId, PersonId = personId };
 
             var result = await groupService.RemoveMemberAsync(model, cancellationToken);
             return result.IsSuccess
