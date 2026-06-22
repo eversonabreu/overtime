@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Evertech.Overtime.Application.Models;
 
@@ -27,4 +27,5 @@ public sealed class TokenResponseModel
     public string AccessToken { get; init; } = string.Empty;
     public string RefreshToken { get; init; } = string.Empty;
     public DateTimeOffset AccessTokenExpiresAt { get; init; }
+    public bool IsPasswordPendingReset { get; init; }
 }

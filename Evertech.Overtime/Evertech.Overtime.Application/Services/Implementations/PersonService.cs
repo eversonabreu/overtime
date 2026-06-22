@@ -1,4 +1,4 @@
-﻿using Evertech.Overtime.Application.Models;
+using Evertech.Overtime.Application.Models;
 using Evertech.Overtime.Application.Services.Abstractions;
 using Evertech.Overtime.Domain.Exceptions;
 using Evertech.Overtime.Domain.Helpers;
@@ -18,8 +18,8 @@ internal sealed class PersonService(
 {
     public async Task<Guid?> CreateFirstAsync(CreateFirstPersonModel model, CancellationToken cancellationToken = default)
     {
-        var existing = await personRepository.GetAllAsync(cancellationToken);
-        if (existing.Count > 0)
+        var any = await personRepository.AnyAsync(cancellationToken);
+        if (any)
             return null;
 
         var plainPassword = PasswordGeneratorHelper.GenerateComplex();
@@ -72,6 +72,12 @@ internal sealed class PersonService(
     {
         var person = await personRepository.GetByIdAsync(id, cancellationToken);
         return person is null ? null : MapToResponse(person);
+    }
+
+    public async Task<IReadOnlyList<PersonResponseModel>> GetActiveAsync(CancellationToken cancellationToken = default)
+    {
+        var persons = await personRepository.GetActiveAsync(cancellationToken);
+        return persons.Select(MapToResponse).ToList();
     }
 
     public async Task<OperationResult> UpdateAsync(UpdatePersonModel model, CancellationToken cancellationToken = default)
@@ -130,7 +136,7 @@ internal sealed class PersonService(
         if (currentPlainPassword != model.CurrentPassword)
             throw new BusinessException("A senha atual informada não confere.");
 
-        await UpdatePasswordAsync(person, model.NewPassword, isPasswordPendingReset: false, sendEmail: false, cancellationToken);
+        await UpdatePasswordInternalAsync(person.Id, model.NewPassword, isPasswordPendingReset: false, cancellationToken);
     }
 
     public async Task RequestPasswordResetAsync(RequestPasswordResetModel model, CancellationToken cancellationToken = default)
@@ -140,7 +146,8 @@ internal sealed class PersonService(
             return;
 
         var plainPassword = PasswordGeneratorHelper.GenerateComplex();
-        await UpdatePasswordAsync(person, plainPassword, isPasswordPendingReset: true, sendEmail: true, cancellationToken);
+        await UpdatePasswordInternalAsync(person.Id, plainPassword, isPasswordPendingReset: true, cancellationToken);
+        BuildPasswordResetEmail(person, plainPassword).Send();
     }
 
     public async Task ResetPasswordAsync(ResetPasswordModel model, CancellationToken cancellationToken = default)
@@ -149,7 +156,7 @@ internal sealed class PersonService(
         if (person is null)
             return;
 
-        await UpdatePasswordAsync(person, model.NewPassword, isPasswordPendingReset: false, sendEmail: false, cancellationToken);
+        await UpdatePasswordInternalAsync(person.Id, model.NewPassword, isPasswordPendingReset: false, cancellationToken);
     }
 
     private async Task<Guid?> CreatePersonAndNotifyAsync(
@@ -195,38 +202,19 @@ internal sealed class PersonService(
         }
     }
 
-    private async Task UpdatePasswordAsync(
-        PersonEntity person,
+    private async Task UpdatePasswordInternalAsync(
+        Guid personId,
         string newPlainPassword,
         bool isPasswordPendingReset,
-        bool sendEmail,
         CancellationToken cancellationToken)
     {
-        var updated = new PersonEntity
-        {
-            Id = person.Id,
-            Name = person.Name,
-            Registration = person.Registration,
-            Email = person.Email,
-            Password = cryptographyService.Encrypt(newPlainPassword),
-            IsActive = person.IsActive,
-            IsPasswordPendingReset = isPasswordPendingReset,
-            IsAdmin = person.IsAdmin,
-            HourlyRate = person.HourlyRate,
-            CompensatoryTimeEnabled = person.CompensatoryTimeEnabled,
-            MunicipalityId = person.MunicipalityId,
-            CreatedAt = person.CreatedAt,
-            UpdatedAt = DateTimeOffset.UtcNow
-        };
+        var encrypted = cryptographyService.Encrypt(newPlainPassword);
 
         await unitOfWork.BeginTransactionAsync(cancellationToken);
         try
         {
-            await personRepository.UpdateAsync(updated, cancellationToken);
+            await personRepository.UpdatePasswordAsync(personId, encrypted, isPasswordPendingReset, cancellationToken);
             await unitOfWork.CommitAsync(cancellationToken);
-
-            if (sendEmail)
-                BuildPasswordResetEmail(updated, newPlainPassword).Send();
         }
         catch
         {

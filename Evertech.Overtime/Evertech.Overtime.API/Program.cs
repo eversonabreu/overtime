@@ -39,7 +39,8 @@ app.MapGroup("/api")
     .AddGroupEndpoints()
     .AddJourneyEndpoints()
     .AddCompensatoryConversionEndpoints()
-    .AddHolidayEndpoints();
+    .AddHolidayEndpoints()
+    .AddLocationEndpoints();
 
 app.UseHttpsRedirection();
 

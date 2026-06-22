@@ -58,6 +58,14 @@ public static class PersonEndpoints
                 : Results.Ok(new { data = person });
         });
 
+        group.MapGet("/", async (
+            IPersonService personService,
+            CancellationToken cancellationToken) =>
+        {
+            var persons = await personService.GetActiveAsync(cancellationToken);
+            return Results.Ok(new { data = persons });
+        });
+
         group.MapPut("/", async (
             UpdatePersonModel model,
             ClaimsPrincipal user,
