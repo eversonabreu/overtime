@@ -14,8 +14,24 @@ ConfigurationSettings.ResolveSecrets(builder.Configuration, builder.Environment.
 builder.Services.AddServices(builder.Configuration);
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontEndPolicy", policy =>
+    {
+        var origins = (builder.Configuration["CorsOrigins"] ?? string.Empty)
+            .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+        policy
+            .WithOrigins(origins)
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
+
 var app = builder.Build();
 
+app.UseCors("FrontEndPolicy");
 app.UseExceptionMiddleware();
 app.UseAuthentication();
 app.UseAuthorization();
