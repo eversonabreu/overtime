@@ -1,6 +1,8 @@
+using System.Security.Claims;
 using Evertech.Overtime.Application.Models;
 using Evertech.Overtime.Application.Services.Abstractions;
 using Evertech.Overtime.Application.Validators;
+using Evertech.Overtime.API.Extensions;
 using FluentValidation;
 
 namespace Evertech.Overtime.API.Endpoints;
@@ -13,10 +15,16 @@ public static class JourneyEndpoints
 
         group.MapPost("/", async (
             CreateJourneyModel model,
+            ClaimsPrincipal user,
             IJourneyService journeyService,
             IValidator<CreateJourneyModel> validator,
             CancellationToken cancellationToken) =>
         {
+            var requesterId = user.GetPersonId();
+
+            if (requesterId != model.PersonId && !user.GetIsAdmin() && !user.GetIsLeader())
+                return Results.Forbid();
+
             var errors = await ValidationHelper.ValidateAsync(validator, model, cancellationToken);
             if (errors is not null)
                 return Results.BadRequest(new { errors });
@@ -49,10 +57,14 @@ public static class JourneyEndpoints
 
         group.MapPatch("/inconsistent", async (
             MarkJourneyInconsistentModel model,
+            ClaimsPrincipal user,
             IJourneyService journeyService,
             IValidator<MarkJourneyInconsistentModel> validator,
             CancellationToken cancellationToken) =>
         {
+            if (!user.GetIsAdmin() && !user.GetIsLeader())
+                return Results.Forbid();
+
             var errors = await ValidationHelper.ValidateAsync(validator, model, cancellationToken);
             if (errors is not null)
                 return Results.BadRequest(new { errors });
@@ -65,9 +77,13 @@ public static class JourneyEndpoints
 
         group.MapDelete("/{id:guid}", async (
             Guid id,
+            ClaimsPrincipal user,
             IJourneyService journeyService,
             CancellationToken cancellationToken) =>
         {
+            if (!user.GetIsAdmin() && !user.GetIsLeader())
+                return Results.Forbid();
+
             var result = await journeyService.DeleteAsync(id, cancellationToken);
             return result.IsSuccess
                 ? Results.NoContent()

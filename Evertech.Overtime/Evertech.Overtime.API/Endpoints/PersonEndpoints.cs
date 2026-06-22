@@ -1,6 +1,8 @@
+using System.Security.Claims;
 using Evertech.Overtime.Application.Models;
 using Evertech.Overtime.Application.Services.Abstractions;
 using Evertech.Overtime.Application.Validators;
+using Evertech.Overtime.API.Extensions;
 using FluentValidation;
 
 namespace Evertech.Overtime.API.Endpoints;
@@ -25,14 +27,18 @@ public static class PersonEndpoints
             return id is null
                 ? Results.NoContent()
                 : Results.Ok(new { data = new { id } });
-        });
+        }).AllowAnonymous();
 
         group.MapPost("/", async (
             CreatePersonModel model,
+            ClaimsPrincipal user,
             IPersonService personService,
             IValidator<CreatePersonModel> validator,
             CancellationToken cancellationToken) =>
         {
+            if (!user.GetIsAdmin())
+                return Results.Forbid();
+
             var errors = await ValidationHelper.ValidateAsync(validator, model, cancellationToken);
             if (errors is not null)
                 return Results.BadRequest(new { errors });
@@ -54,10 +60,19 @@ public static class PersonEndpoints
 
         group.MapPut("/", async (
             UpdatePersonModel model,
+            ClaimsPrincipal user,
             IPersonService personService,
             IValidator<UpdatePersonModel> validator,
             CancellationToken cancellationToken) =>
         {
+            var requesterId = user.GetPersonId();
+
+            if (requesterId == model.Id)
+                return Results.Forbid();
+
+            if (!user.GetIsAdmin() && !user.GetIsLeader())
+                return Results.Forbid();
+
             var errors = await ValidationHelper.ValidateAsync(validator, model, cancellationToken);
             if (errors is not null)
                 return Results.BadRequest(new { errors });
@@ -70,10 +85,16 @@ public static class PersonEndpoints
 
         group.MapPatch("/change-password", async (
             ChangePasswordModel model,
+            ClaimsPrincipal user,
             IPersonService personService,
             IValidator<ChangePasswordModel> validator,
             CancellationToken cancellationToken) =>
         {
+            var requesterId = user.GetPersonId();
+
+            if (requesterId != model.PersonId)
+                return Results.Forbid();
+
             var errors = await ValidationHelper.ValidateAsync(validator, model, cancellationToken);
             if (errors is not null)
                 return Results.BadRequest(new { errors });
@@ -94,14 +115,20 @@ public static class PersonEndpoints
 
             await personService.RequestPasswordResetAsync(model, cancellationToken);
             return Results.NoContent();
-        });
+        }).AllowAnonymous();
 
         group.MapPatch("/reset-password", async (
             ResetPasswordModel model,
+            ClaimsPrincipal user,
             IPersonService personService,
             IValidator<ResetPasswordModel> validator,
             CancellationToken cancellationToken) =>
         {
+            var requesterId = user.GetPersonId();
+
+            if (requesterId != model.PersonId)
+                return Results.Forbid();
+
             var errors = await ValidationHelper.ValidateAsync(validator, model, cancellationToken);
             if (errors is not null)
                 return Results.BadRequest(new { errors });

@@ -1,6 +1,8 @@
+using System.Security.Claims;
 using Evertech.Overtime.Application.Models;
 using Evertech.Overtime.Application.Services.Abstractions;
 using Evertech.Overtime.Application.Validators;
+using Evertech.Overtime.API.Extensions;
 using FluentValidation;
 
 namespace Evertech.Overtime.API.Endpoints;
@@ -13,10 +15,14 @@ public static class GroupEndpoints
 
         group.MapPost("/", async (
             CreateGroupModel model,
+            ClaimsPrincipal user,
             IGroupService groupService,
             IValidator<CreateGroupModel> validator,
             CancellationToken cancellationToken) =>
         {
+            if (!user.GetIsAdmin())
+                return Results.Forbid();
+
             var errors = await ValidationHelper.ValidateAsync(validator, model, cancellationToken);
             if (errors is not null)
                 return Results.BadRequest(new { errors });
@@ -46,10 +52,14 @@ public static class GroupEndpoints
 
         group.MapPut("/", async (
             UpdateGroupModel model,
+            ClaimsPrincipal user,
             IGroupService groupService,
             IValidator<UpdateGroupModel> validator,
             CancellationToken cancellationToken) =>
         {
+            if (!user.GetIsAdmin())
+                return Results.Forbid();
+
             var errors = await ValidationHelper.ValidateAsync(validator, model, cancellationToken);
             if (errors is not null)
                 return Results.BadRequest(new { errors });
@@ -60,10 +70,14 @@ public static class GroupEndpoints
 
         group.MapPost("/members", async (
             AddPersonToGroupModel model,
+            ClaimsPrincipal user,
             IGroupService groupService,
             IValidator<AddPersonToGroupModel> validator,
             CancellationToken cancellationToken) =>
         {
+            if (!user.GetIsAdmin() && !user.IsLeaderOfGroup(model.GroupId))
+                return Results.Forbid();
+
             var errors = await ValidationHelper.ValidateAsync(validator, model, cancellationToken);
             if (errors is not null)
                 return Results.BadRequest(new { errors });
@@ -76,10 +90,14 @@ public static class GroupEndpoints
 
         group.MapDelete("/members", async (
             RemoveGroupMemberModel model,
+            ClaimsPrincipal user,
             IGroupService groupService,
             IValidator<RemoveGroupMemberModel> validator,
             CancellationToken cancellationToken) =>
         {
+            if (!user.GetIsAdmin() && !user.IsLeaderOfGroup(model.GroupId))
+                return Results.Forbid();
+
             var errors = await ValidationHelper.ValidateAsync(validator, model, cancellationToken);
             if (errors is not null)
                 return Results.BadRequest(new { errors });
@@ -92,10 +110,14 @@ public static class GroupEndpoints
 
         group.MapPatch("/leaders", async (
             SetGroupLeaderModel model,
+            ClaimsPrincipal user,
             IGroupService groupService,
             IValidator<SetGroupLeaderModel> validator,
             CancellationToken cancellationToken) =>
         {
+            if (!user.GetIsAdmin())
+                return Results.Forbid();
+
             var errors = await ValidationHelper.ValidateAsync(validator, model, cancellationToken);
             if (errors is not null)
                 return Results.BadRequest(new { errors });

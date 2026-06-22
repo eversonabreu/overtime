@@ -1,6 +1,8 @@
+using System.Security.Claims;
 using Evertech.Overtime.Application.Models;
 using Evertech.Overtime.Application.Services.Abstractions;
 using Evertech.Overtime.Application.Validators;
+using Evertech.Overtime.API.Extensions;
 using FluentValidation;
 
 namespace Evertech.Overtime.API.Endpoints;
@@ -13,10 +15,14 @@ public static class CompensatoryConversionEndpoints
 
         group.MapPost("/", async (
             CreateCompensatoryConversionModel model,
+            ClaimsPrincipal user,
             ICompensatoryConversionAppService conversionService,
             IValidator<CreateCompensatoryConversionModel> validator,
             CancellationToken cancellationToken) =>
         {
+            if (!user.GetIsAdmin() && !user.GetIsLeader())
+                return Results.Forbid();
+
             var errors = await ValidationHelper.ValidateAsync(validator, model, cancellationToken);
             if (errors is not null)
                 return Results.BadRequest(new { errors });
@@ -27,10 +33,14 @@ public static class CompensatoryConversionEndpoints
 
         group.MapPut("/", async (
             UpdateCompensatoryConversionModel model,
+            ClaimsPrincipal user,
             ICompensatoryConversionAppService conversionService,
             IValidator<UpdateCompensatoryConversionModel> validator,
             CancellationToken cancellationToken) =>
         {
+            if (!user.GetIsAdmin() && !user.GetIsLeader())
+                return Results.Forbid();
+
             var errors = await ValidationHelper.ValidateAsync(validator, model, cancellationToken);
             if (errors is not null)
                 return Results.BadRequest(new { errors });
@@ -43,9 +53,13 @@ public static class CompensatoryConversionEndpoints
 
         group.MapDelete("/{id:guid}", async (
             Guid id,
+            ClaimsPrincipal user,
             ICompensatoryConversionAppService conversionService,
             CancellationToken cancellationToken) =>
         {
+            if (!user.GetIsAdmin() && !user.GetIsLeader())
+                return Results.Forbid();
+
             var result = await conversionService.DeleteAsync(id, cancellationToken);
             return result.IsSuccess
                 ? Results.NoContent()

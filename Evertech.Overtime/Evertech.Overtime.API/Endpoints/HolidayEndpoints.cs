@@ -1,6 +1,8 @@
+using System.Security.Claims;
 using Evertech.Overtime.Application.Models;
 using Evertech.Overtime.Application.Services.Abstractions;
 using Evertech.Overtime.Application.Validators;
+using Evertech.Overtime.API.Extensions;
 using FluentValidation;
 
 namespace Evertech.Overtime.API.Endpoints;
@@ -22,10 +24,14 @@ public static class HolidayEndpoints
 
         group.MapPost("/", async (
             CreateNationalHolidayModel model,
+            ClaimsPrincipal user,
             IHolidayAppService holidayService,
             IValidator<CreateNationalHolidayModel> validator,
             CancellationToken cancellationToken) =>
         {
+            if (!user.GetIsAdmin())
+                return Results.Forbid();
+
             var errors = await ValidationHelper.ValidateAsync(validator, model, cancellationToken);
             if (errors is not null)
                 return Results.BadRequest(new { errors });
@@ -36,10 +42,14 @@ public static class HolidayEndpoints
 
         group.MapPut("/", async (
             UpdateNationalHolidayModel model,
+            ClaimsPrincipal user,
             IHolidayAppService holidayService,
             IValidator<UpdateNationalHolidayModel> validator,
             CancellationToken cancellationToken) =>
         {
+            if (!user.GetIsAdmin())
+                return Results.Forbid();
+
             var errors = await ValidationHelper.ValidateAsync(validator, model, cancellationToken);
             if (errors is not null)
                 return Results.BadRequest(new { errors });
@@ -50,9 +60,13 @@ public static class HolidayEndpoints
 
         group.MapDelete("/{id:guid}", async (
             Guid id,
+            ClaimsPrincipal user,
             IHolidayAppService holidayService,
             CancellationToken cancellationToken) =>
         {
+            if (!user.GetIsAdmin())
+                return Results.Forbid();
+
             await holidayService.DeleteNationalAsync(id, cancellationToken);
             return Results.NoContent();
         });
@@ -73,10 +87,14 @@ public static class HolidayEndpoints
 
         group.MapPost("/", async (
             CreateStateHolidayModel model,
+            ClaimsPrincipal user,
             IHolidayAppService holidayService,
             IValidator<CreateStateHolidayModel> validator,
             CancellationToken cancellationToken) =>
         {
+            if (!user.GetIsAdmin())
+                return Results.Forbid();
+
             var errors = await ValidationHelper.ValidateAsync(validator, model, cancellationToken);
             if (errors is not null)
                 return Results.BadRequest(new { errors });
@@ -87,10 +105,14 @@ public static class HolidayEndpoints
 
         group.MapPut("/", async (
             UpdateStateHolidayModel model,
+            ClaimsPrincipal user,
             IHolidayAppService holidayService,
             IValidator<UpdateStateHolidayModel> validator,
             CancellationToken cancellationToken) =>
         {
+            if (!user.GetIsAdmin())
+                return Results.Forbid();
+
             var errors = await ValidationHelper.ValidateAsync(validator, model, cancellationToken);
             if (errors is not null)
                 return Results.BadRequest(new { errors });
@@ -101,9 +123,13 @@ public static class HolidayEndpoints
 
         group.MapDelete("/{id:guid}", async (
             Guid id,
+            ClaimsPrincipal user,
             IHolidayAppService holidayService,
             CancellationToken cancellationToken) =>
         {
+            if (!user.GetIsAdmin())
+                return Results.Forbid();
+
             await holidayService.DeleteStateAsync(id, cancellationToken);
             return Results.NoContent();
         });
@@ -125,10 +151,14 @@ public static class HolidayEndpoints
 
         group.MapPost("/", async (
             CreateMunicipalityHolidayModel model,
+            ClaimsPrincipal user,
             IHolidayAppService holidayService,
             IValidator<CreateMunicipalityHolidayModel> validator,
             CancellationToken cancellationToken) =>
         {
+            if (!user.GetIsAdmin())
+                return Results.Forbid();
+
             var errors = await ValidationHelper.ValidateAsync(validator, model, cancellationToken);
             if (errors is not null)
                 return Results.BadRequest(new { errors });
@@ -139,10 +169,14 @@ public static class HolidayEndpoints
 
         group.MapPut("/", async (
             UpdateMunicipalityHolidayModel model,
+            ClaimsPrincipal user,
             IHolidayAppService holidayService,
             IValidator<UpdateMunicipalityHolidayModel> validator,
             CancellationToken cancellationToken) =>
         {
+            if (!user.GetIsAdmin())
+                return Results.Forbid();
+
             var errors = await ValidationHelper.ValidateAsync(validator, model, cancellationToken);
             if (errors is not null)
                 return Results.BadRequest(new { errors });
@@ -153,9 +187,13 @@ public static class HolidayEndpoints
 
         group.MapDelete("/{id:guid}", async (
             Guid id,
+            ClaimsPrincipal user,
             IHolidayAppService holidayService,
             CancellationToken cancellationToken) =>
         {
+            if (!user.GetIsAdmin())
+                return Results.Forbid();
+
             await holidayService.DeleteMunicipalityAsync(id, cancellationToken);
             return Results.NoContent();
         });
