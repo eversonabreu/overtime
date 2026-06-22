@@ -1,13 +1,11 @@
-﻿using Dapper;
+using Dapper;
 using Evertech.Overtime.Domain.Entities;
 using Evertech.Overtime.Domain.Repositories;
 using Evertech.Overtime.Domain.Services.Abstractions;
 using Evertech.Overtime.Infrastructure.Repositories.Base;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Evertech.Overtime.Infrastructure.Repositories;
 
-[ExcludeFromCodeCoverage]
 internal sealed class GroupPersonRepository(IDbUnitOfWork unitOfWork) : RepositoryBase<GroupPerson>(unitOfWork), IGroupPersonRepository
 {
     protected override string TableName => "group_persons";
@@ -43,7 +41,7 @@ internal sealed class GroupPersonRepository(IDbUnitOfWork unitOfWork) : Reposito
         return result.AsList();
     }
 
-    public async Task<GroupPerson> GetByGroupAndPersonAsync(Guid groupId, Guid personId, CancellationToken cancellationToken = default)
+    public async Task<GroupPerson?> GetByGroupAndPersonAsync(Guid groupId, Guid personId, CancellationToken cancellationToken = default)
     {
         const string sql = "SELECT * FROM group_persons WHERE groupId = @GroupId AND personId = @PersonId";
         var command = new CommandDefinition(sql, new { GroupId = groupId, PersonId = personId }, UnitOfWork.Transaction, cancellationToken: cancellationToken);
@@ -57,6 +55,21 @@ internal sealed class GroupPersonRepository(IDbUnitOfWork unitOfWork) : Reposito
         var command = new CommandDefinition(sql, new { GroupId = groupId }, UnitOfWork.Transaction, cancellationToken: cancellationToken);
 
         return await UnitOfWork.Connection.ExecuteScalarAsync<int>(command);
+    }
+
+    public async Task<IReadOnlyList<GroupPerson>> GetActiveByPersonIdAsync(Guid personId, CancellationToken cancellationToken = default)
+    {
+        const string sql = """
+            SELECT gp.*
+            FROM group_persons gp
+            JOIN groups g ON g.id = gp.groupId
+            WHERE gp.personId = @PersonId
+              AND g.isActive = TRUE
+            """;
+
+        var command = new CommandDefinition(sql, new { PersonId = personId }, UnitOfWork.Transaction, cancellationToken: cancellationToken);
+        var result = await UnitOfWork.Connection.QueryAsync<GroupPerson>(command);
+        return result.AsList();
     }
 
     public async Task<bool> IsLeaderOfAnyGroupAsync(Guid personId, CancellationToken cancellationToken = default)

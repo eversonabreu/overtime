@@ -29,6 +29,7 @@ public static class RegisterServices
         services.AddScoped<IGroupService, GroupService>();
         services.AddScoped<IJourneyService, JourneyService>();
         services.AddScoped<ICompensatoryConversionAppService, CompensatoryConversionAppService>();
+        services.AddScoped<IHolidayAppService, HolidayAppService>();
 
         return services;
     }
