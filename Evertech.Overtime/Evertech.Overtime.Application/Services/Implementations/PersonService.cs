@@ -36,7 +36,9 @@ internal sealed class PersonService(
             IsPasswordPendingReset = true,
             IsAdmin = true,
             CreatedAt = createdAt,
-            UpdatedAt = createdAt
+            UpdatedAt = createdAt,
+            HourlyRate = 0.1m, // Default hourly rate for the first person (admin).
+            MunicipalityId = Guid.Parse("cc01c41a-4f65-41b0-830c-18135ded4e7d") // This is the SP (Brazil) municipality ID. (Deafult municipality)
         };
 
         return await CreatePersonAndNotifyAsync(person, plainPassword, cancellationToken);

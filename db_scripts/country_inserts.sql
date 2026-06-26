@@ -1,0 +1,1 @@
+insert into country (id, name) values ('f646afdd-af93-4c0d-a26d-21891dbbcac3', 'Brasil');
